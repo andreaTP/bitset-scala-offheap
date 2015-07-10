@@ -8,7 +8,7 @@ object test extends App {
   
   val samples = 10000000
   
-  val bsSize = 10000
+  val bsSize = Integer.MAX_VALUE / 1000
   
   implicit val alloc = scala.offheap.malloc
   
@@ -42,6 +42,12 @@ object test extends App {
     assert(bs.get(6) == false)
     assert(bs.get(7) == true)
     assert(bs.get(8) == false)
+    
+    bs.set(1, false)
+    assert(bs.get(1) == false)
+    
+    bs.set(3, false)
+    assert(bs.get(3) == false)
     //bs.clear()
   }
   
@@ -78,6 +84,12 @@ object test extends App {
     assert(bs2.get(6) == false)
     assert(bs2.get(7) == true)
     assert(bs2.get(8) == false)
+    
+    bs2.set(1, false)
+    assert(bs2.get(1) == false)
+    
+    bs2.set(3, false)
+    assert(bs2.get(3) == false)
     //bs.clear()
   }
 
