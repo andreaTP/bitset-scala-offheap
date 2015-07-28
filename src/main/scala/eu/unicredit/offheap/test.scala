@@ -34,14 +34,14 @@ object test extends App {
    * 
 @densh notes
 
-Never use Scala’s for loops in performance critical code. While loops only.
-If method is not part of public api it has to be private.
-If you don’t explicitly design for inheritance, you should always make class final.
-Never use your own hand-rolled measurements for performance testing. Use jmh. There is an excellent sbt-jmh plugin. You can have a look at how to use in scala-offheap benchmark suite. I also highly recommend reading all of the examples: http://hg.openjdk.java.net/code-tools/jmh/file/tip/jmh-samples/src/main/java/org/openjdk/jmh/samples/. They can teach a lot on how to benchmark code on JVM properly.
-If you allocate offheap and support all allocators you should always clean up by calling free in the finalizer. This is not necessary if you take implicit region rather than allocator, regions clean themselves up automatically.
-It’s a good idea to provide a helper that lets you construct bitset as if it was a default collection through something like: BitSet(a, b, c)
-It’s a good idea to include class name in the toString printout. It’s even better if toString is effectively the code to construct the copy of the object.
-Tests, tests are super important. The more the merrier
+ok -> Never use Scala’s for loops in performance critical code. While loops only.
+ok -> If method is not part of public api it has to be private.
+don't care -> If you don’t explicitly design for inheritance, you should always make class final.
+TBD -> Never use your own hand-rolled measurements for performance testing. Use jmh. There is an excellent sbt-jmh plugin. You can have a look at how to use in scala-offheap benchmark suite. I also highly recommend reading all of the examples: http://hg.openjdk.java.net/code-tools/jmh/file/tip/jmh-samples/src/main/java/org/openjdk/jmh/samples/. They can teach a lot on how to benchmark code on JVM properly.
+let see -> If you allocate offheap and support all allocators you should always clean up by calling free in the finalizer. This is not necessary if you take implicit region rather than allocator, regions clean themselves up automatically.
+don't care -> It’s a good idea to provide a helper that lets you construct bitset as if it was a default collection through something like: BitSet(a, b, c)
+equivalent to java one -> It’s a good idea to include class name in the toString printout. It’s even better if toString is effectively the code to construct the copy of the object.
+TBD -> Tests, tests are super important. The more the merrier
    * 
    */
   
@@ -76,6 +76,7 @@ Tests, tests are super important. The more the merrier
     val min = aSize min bSize
     val max = aSize max bSize
     val iSize = (aIn intersect bIn).size
+    da implementare con AND e lenght
 
     (log(1 + max) - log(1 + iSize)) / (log(scale) - log(min))
   }

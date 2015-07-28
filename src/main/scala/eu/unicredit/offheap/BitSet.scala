@@ -14,7 +14,7 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
     
     tsize
   }
-  
+
   private var _lenght = 0
   
   private def byteSize() = ((_size / 8) + 1)
@@ -27,6 +27,9 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
     
   private var inner: Array[Byte] = Array.fill(byteSize)(0)
 
+  override def finalize() =
+    a.free(inner.addr)
+    
   def clear() = {
     var i = 0
     while (i < byteSize) {
@@ -251,18 +254,38 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
 
   def size(): Int =
     _size
-    
+
+  private val bitNumber: Map[Int, Int] = Map(
+      0x00 -> 0,
+      0x01 -> 1,
+      0x02 -> 1,
+      0x03 -> 2,
+      0x04 -> 1,
+      0x05 -> 2,
+      0x06 -> 2,
+      0x07 -> 3,
+      0x08 -> 1,
+      0x09 -> 2,
+      0x0A -> 2,
+      0x0B -> 3,
+      0x0C -> 2,
+      0x0D -> 3,
+      0x0E -> 3,
+      0x0F -> 4
+      )
+  
   def length(): Int = {
     var res = 0
     var i = 0
     while (i < inner.size) {
       val byte = inner(i)
-      var k = 0
+      res += bitNumber((byte >> 4) & 0x0F) + bitNumber(byte & 0x0F)
+      /*var k = 0
       while (k < 8) {
         if ((byte & (1 << k)) > 0)
           res = ((i*8)+k+1)
         k+=1
-      }
+      }*/
       i+=1
     }
     res
