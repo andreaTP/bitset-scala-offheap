@@ -4,6 +4,45 @@ object test extends App {
 
   println("testing bitsets...")
   
+  /*
+   * Example to use
+
+    def makeBitSets[A](lists: Map[String, List[A]]) = {
+    val index = HashMap[A, Int]()
+    var count = 0
+
+    lists map {
+      case (key, xs) =>
+        val bitset = BitSet()
+
+        xs foreach { x =>
+          index get x map { n =>
+            bitset += n
+          } getOrElse {
+            index(x) = count
+            bitset += count
+            count += 1
+          }
+        }
+        (key -> bitset)
+    }
+  }
+
+  def relatedness[A](aIn: BitSet, bIn: BitSet): Double = {
+    val scale = 40000
+    val aSize = aIn.size
+    val bSize = bIn.size
+    val min = aSize min bSize
+    val max = aSize max bSize
+    val iSize = (aIn intersect bIn).size
+
+    (log(1 + max) - log(1 + iSize)) / (log(scale) - log(min))
+  }
+
+   * 
+   */
+  
+  
   def now() = System.currentTimeMillis()
   
   val samples = 10000000

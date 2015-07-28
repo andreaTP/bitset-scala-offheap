@@ -17,27 +17,47 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
   
   private var _lenght = 0
   
-  def byteSize() = ((_size / 8) + 1)
+  private def byteSize() = ((_size / 8) + 1)
   
-  def byteOfBitN(n: Int) =
+  private def byteOfBitN(n: Int) =
     n / 8    
 
-  def byteMask(n: Int) =
+  private def byteMask(n: Int) =
     1 << (n % 8)
   
-  def rightMask(n: Int) =
-    (for (i <- 0 until (n%8))
-    yield 1 << i).sum
+  private def rightMask(n: Int) = {
+    var i = 0
+    val bound = n%8
+    var sum = 0
+    while (i < bound) {
+      sum += 1 << i
+      i += 1
+    }
+      
+    sum
+  }
     
-  def leftMask(n: Int) =
-    (for (i <- 0 until (n%8))
-    yield 1 << (7-i)).sum
-
+  private def leftMask(n: Int) = {
+    var i = 0
+    val bound = n%8
+    var sum = 0
+    while (i < bound) {
+      sum += 1 << (7-i)
+      i += 1
+    }
+      
+    sum
+  }
+    
   private var inner: Array[Byte] = Array.fill(byteSize)(0)
 
-  def clear() =
-    for (i <- 0 until byteSize)
+  def clear() = {
+    var i = 0
+    while (i < byteSize) {
       inner.update(i, 0.toByte)
+      i += 1
+    }
+  }
     
   def set(index: Int): Unit =
     set(index, true)
@@ -65,9 +85,13 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
     _set(bitIndex, oldValue => !oldValue)
 
   //NOT optimized...    
-  def flip(fromIndex: Int, toIndex: Int): Unit =
-    for (i <- fromIndex until toIndex)
+  def flip(fromIndex: Int, toIndex: Int): Unit = {
+    var i = fromIndex
+    while (i < toIndex) {
       _set(i, oldValue => !oldValue)
+      i += 1
+    }
+  }
   
   def set(fromIndex: Int, toIndex: Int): Unit =
     set(fromIndex, toIndex, true)
