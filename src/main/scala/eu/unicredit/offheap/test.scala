@@ -4,6 +4,47 @@ object test extends App {
 
   println("testing bitsets...")
   
+    implicit val alloc = scala.offheap.malloc
+  
+    val b = new BitSet(10)
+  
+    b.set(6,9)
+    
+    println(b)
+    
+    b.set(8,9, false)
+    
+    println(b)
+  /*
+    b.set(0,2)
+    
+    println(b)
+    
+    b.set(0,7)
+    
+    println(b)
+    
+    b.set(1,2,false)
+    
+    println(b)
+    */
+    System.exit(0)
+  
+  /*
+   * 
+@densh notes
+
+Never use Scala’s for loops in performance critical code. While loops only.
+If method is not part of public api it has to be private.
+If you don’t explicitly design for inheritance, you should always make class final.
+Never use your own hand-rolled measurements for performance testing. Use jmh. There is an excellent sbt-jmh plugin. You can have a look at how to use in scala-offheap benchmark suite. I also highly recommend reading all of the examples: http://hg.openjdk.java.net/code-tools/jmh/file/tip/jmh-samples/src/main/java/org/openjdk/jmh/samples/. They can teach a lot on how to benchmark code on JVM properly.
+If you allocate offheap and support all allocators you should always clean up by calling free in the finalizer. This is not necessary if you take implicit region rather than allocator, regions clean themselves up automatically.
+It’s a good idea to provide a helper that lets you construct bitset as if it was a default collection through something like: BitSet(a, b, c)
+It’s a good idea to include class name in the toString printout. It’s even better if toString is effectively the code to construct the copy of the object.
+Tests, tests are super important. The more the merrier
+   * 
+   */
+  
   /*
    * Example to use
 
@@ -42,7 +83,7 @@ object test extends App {
    * 
    */
   
-  
+  /*
   def now() = System.currentTimeMillis()
   
   val samples = 10000000
@@ -137,5 +178,5 @@ object test extends App {
   println("Performances are")
   println("Mine -> "+(afterOffheap-beforeOffheap))
   println("JU   -> "+(afterJU-beforeJU))
-  
+  */
 }

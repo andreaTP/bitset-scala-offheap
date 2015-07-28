@@ -186,7 +186,6 @@ class BitSetTest extends FlatSpec {
     assert{bs.previousSetBit(8) == jbs.previousSetBit(8)}
   }
   
-  /* there is a bug in set to be fixed
   it should "get previous clear bit" in {
     val bs = new BitSet()
     val jbs = new juBitSet()
@@ -195,8 +194,8 @@ class BitSetTest extends FlatSpec {
     
     jbs.set(6, 10)
     
-    //assert{bs.previousClearBit(8) == 5}
+    assert{bs.previousClearBit(8) == 5}
     assert{bs.previousClearBit(8) == jbs.previousClearBit(8)}
   }
-  */
+  
 }
