@@ -172,7 +172,6 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
       var i = firstByte + 1
       while (i < lastByte) {
         inner.update(i, default)
-      
         i += 1
       }
       inner.update(lastByte, lastByteNewValue)
@@ -251,6 +250,22 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
     if (res == -1) throw new IndexOutOfBoundsException()
     else res
   }
+  
+  def and(set: BitSet): Unit = {
+    var i = 0
+    while (i < byteSize) {
+      inner.update(i, (inner(i) & set.inner(i)).toByte)
+      i+=1
+    }
+  }
+  
+  def or(set: BitSet): Unit = {
+    var i = 0
+    while (i < byteSize) {
+      inner.update(i, (inner(i) | set.inner(i)).toByte)
+      i+=1
+    }
+  }
 
   def size(): Int =
     _size
@@ -279,16 +294,37 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
     var i = 0
     while (i < inner.size) {
       val byte = inner(i)
-      res += bitNumber((byte >> 4) & 0x0F) + bitNumber(byte & 0x0F)
-      /*var k = 0
+      var k = 0
       while (k < 8) {
         if ((byte & (1 << k)) > 0)
           res = ((i*8)+k+1)
         k+=1
-      }*/
+      }
       i+=1
     }
     res
+  }
+  
+  def cardinality(): Int = {
+    var res = 0
+    var i = 0
+    while (i < byteSize) {
+      val byte = inner(i)
+      res += bitNumber((byte >> 4) & 0x0F) + bitNumber(byte & 0x0F)
+      i+=1
+    }
+    res
+  }
+  
+  override def clone(): BitSet = {
+    val ret = new BitSet(_size)
+    var i = 0
+    while (i < byteSize) {
+      ret.inner.update(i, inner(i))
+      i += 1
+    }
+     
+    ret
   }
 
   override def toString(): String = {

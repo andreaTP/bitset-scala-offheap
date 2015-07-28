@@ -5,7 +5,114 @@ object test extends App {
   println("testing bitsets...")
   
     implicit val alloc = scala.offheap.malloc
-  
+
+    //Example
+    
+    import scala.util.Random
+    val mappa =  /*Map(
+        "uno" -> List(1,2,3),
+        "due" -> List(4,5,6)
+    )*/
+    (for (i <- 0 to (Random.nextInt(10)*100)) yield {
+      Random.nextString(10) -> (for (j <- 0 to (Random.nextInt(50))) yield j).toList 
+    }).toMap
+    
+    import scala.collection.mutable.HashMap
+    def makeBitSets[A](lists: Map[String, List[A]]): Map[String, BitSet] = {
+      val index = HashMap[A, Int]()
+      var count = 0
+
+      lists map {
+        case (key, xs) =>
+          val bitset = new BitSet()
+
+          xs foreach { x =>
+            index get x map { n =>
+              bitset set n
+            } getOrElse {
+              index(x) = count
+              bitset set count
+              count += 1
+            }
+        }
+        (key -> bitset)
+      }
+    }
+    
+    def relatedness[A](aIn: BitSet, bIn: BitSet): Double = {
+      val scale = 40000
+      val aSize = aIn.size
+      val bSize = bIn.size
+      val min = aSize min bSize
+      val max = aSize max bSize
+      val temp = aIn.clone() //loosing time...
+      temp and bIn
+      val iSize = temp.cardinality()
+
+      //(log(1 + max) - log(1 + iSize)) / (log(scale) - log(min))
+      iSize
+    }
+    
+        
+  //original
+    def originalMakeBitSets[A](lists: Map[String, List[A]]) = {
+    val index = HashMap[A, Int]()
+    var count = 0
+
+    lists map {
+      case (key, xs) =>
+        val bitset = scala.collection.mutable.BitSet()
+
+        xs foreach { x =>
+          index get x map { n =>
+            bitset += n
+          } getOrElse {
+            index(x) = count
+            bitset += count
+            count += 1
+          }
+        }
+        (key -> bitset)
+    }
+  }
+
+  def originalRelatedness[A](aIn: scala.collection.mutable.BitSet, bIn: scala.collection.mutable.BitSet): Double = {
+    val scale = 40000
+    val aSize = aIn.size
+    val bSize = bIn.size
+    val min = aSize min bSize
+    val max = aSize max bSize
+    val iSize = (aIn intersect bIn).size
+
+    //(log(1 + max) - log(1 + iSize)) / (log(scale) - log(min))
+    iSize
+  }
+
+    println("OFFHEAP")
+    val now11 = System.currentTimeMillis()
+    val bss1 = makeBitSets(mappa)
+    
+    for (one <- bss1.values) {
+      for (two <- bss1.values) {
+        /*println*/(relatedness(one, two))
+      }
+    }
+    val now12 = System.currentTimeMillis()
+    println("time -> "+(now12-now11))
+    
+    println()
+    println("STD")
+    val now21 = System.currentTimeMillis()
+    val bss2 = originalMakeBitSets(mappa)
+    
+    for (one <- bss2.values) {
+      for (two <- bss2.values) {
+        /*println*/(originalRelatedness(one, two))
+      }
+    }
+    val now22 = System.currentTimeMillis()
+    println("time -> "+(now22-now21))
+    /*
     val b = new BitSet(10)
   
     b.set(6,9)
@@ -15,6 +122,7 @@ object test extends App {
     b.set(8,9, false)
     
     println(b)
+    */
   /*
     b.set(0,2)
     
