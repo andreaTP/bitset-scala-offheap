@@ -4,8 +4,11 @@ object test extends App {
 
   println("testing bitsets...")
   
-    implicit val alloc = scala.offheap.malloc
-
+    //implicit val alloc = scala.offheap.malloc
+    implicit val props = scala.offheap.Region.Props()
+    
+    implicit val region = scala.offheap.Region.open
+  
     //Example
     
     import scala.util.Random
@@ -288,4 +291,5 @@ TBD -> Tests, tests are super important. The more the merrier
   println("Mine -> "+(afterOffheap-beforeOffheap))
   println("JU   -> "+(afterJU-beforeJU))
   */
+  region.close
 }

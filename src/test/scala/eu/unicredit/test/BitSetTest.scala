@@ -7,7 +7,8 @@ import eu.unicredit.offheap.BitSet
 
 class BitSetTest extends FlatSpec {
 
-  implicit val alloc = scala.offheap.malloc
+  implicit val props = scala.offheap.Region.Props()
+  implicit val region = scala.offheap.Region.open
   
   "A BitSet" should "be created offheap with a size" in {
     val bs = new BitSet()

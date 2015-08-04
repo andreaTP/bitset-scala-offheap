@@ -13,4 +13,4 @@ libraryDependencies ++= Seq(
 
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
 
-
+enablePlugins(JmhPlugin)

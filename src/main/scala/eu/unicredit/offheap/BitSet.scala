@@ -2,9 +2,9 @@ package eu.unicredit.offheap
 
 import scala.offheap._
 
-class BitSet(nbits: Int)(implicit a: Allocator) {
+class BitSet(nbits: Int)(implicit region: Region) {
   
-  def this()(implicit a: Allocator) =
+  def this()(implicit region: Region) =
     this(64)
   
   private var _size = {
@@ -17,23 +17,20 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
 
   private var _lenght = 0
   
-  private def byteSize() = ((_size / 8) + 1)
+  private lazy val byteSize = ((_size / 64) + 1)
   
   private def byteOfBitN(n: Int) =
-    n / 8    
+    n / 64
 
   private def byteMask(n: Int) =
-    1 << (n % 8)
+    1L << (n % 64)
     
-  private var inner: Array[Byte] = Array.fill(byteSize)(0)
-
-  override def finalize() =
-    a.free(inner.addr)
+  private var inner: Array[Long] = Array.fill(byteSize)(0L)
     
   def clear() = {
     var i = 0
     while (i < byteSize) {
-      inner.update(i, 0.toByte)
+      inner.update(i, 0L)
       i += 1
     }
   }
@@ -53,9 +50,9 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
     val value = _value(oldValue)
     if (oldValue != value) {
       if (value)
-        inner.update(bytePos, (last | bitMask).toByte)
+        inner.update(bytePos, (last | bitMask))
       else
-        inner.update(bytePos, (last & (0xFF - bitMask)).toByte)
+        inner.update(bytePos, (last & (0xFFFFFFFFL - bitMask)))
     }
   }
   
@@ -99,74 +96,73 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
       8 -> 255)
       
   def set(fromIndex: Int, toIndex: Int, value: Boolean): Unit = {
-    val bytesPos =
-      byteOfBitN(fromIndex) to byteOfBitN(toIndex)
          
     val firstByte = byteOfBitN(fromIndex)
     val lastByte = byteOfBitN(toIndex)
     
+    val bytesPos =
+      firstByte to lastByte
+    
     val firstByteNewValue = {
-      val bound = fromIndex - firstByte*8
-      var i = 7
-      var mask = 0
+      val bound = fromIndex - firstByte*64
+      var i = 63
+      var mask = 0L
       
       if (value) {
-        mask = leftMask(bound)
-        /*while (i >= bound) {
-          mask += (1 << i)
+        //mask = leftMask(bound)
+        while (i >= bound) {
+          mask += (1L << i)
           i -= 1
-        }*/
+        }
         inner(firstByte) | mask 
       } else {
-        mask = rightMask(bound)
-        /*
+        //mask = rightMask(bound)
         i = 0
         while (i < bound) {
-          mask += (1 << i)
+          mask += (1L << i)
           i += 1
         }
-        */
         inner(firstByte) & mask
       }
-    }.toByte
+    }
 
     
     val lastByteNewValue = {
-      val bound = toIndex - lastByte*8
-      var i = 7
-      var mask = 0
+      val bound = toIndex - lastByte*64
+      var i = 63
+      var mask = 0L
       
       if (value) {
-        mask = rightMask(bound)
-        /*i = 0
+        //mask = rightMask(bound)
+        i = 0
         while (i < bound) {
-          mask += (1 << i)
+          mask += (1L << i)
           i += 1
-        }*/
+        }
         inner(firstByte) | mask 
       } else {
-        mask = leftMask(bound)
-        /*while (i >= bound) {
-          mask += (1 << i)
+        //mask = leftMask(bound)
+        while (i >= bound) {
+          mask += (1L << i)
           i -= 1
-        }*/
+        }
         inner(firstByte) & mask
       }
-    }.toByte
+    }
     
-    val default =
-       (if (value) 0xFF
-       else 0x00).toByte
+    val default: Long =
+       (if (value) 0xFFFFFFFFL
+       else 0x00000000L)
 
     if (firstByte == lastByte) {
-      val b = { 
+      val b: Long = { 
         if (value) {
           firstByteNewValue & lastByteNewValue
         } else {
           firstByteNewValue | lastByteNewValue
         }
       }
-      inner.update(firstByte, b.toByte)
+      inner.update(firstByte, b)
     } else {     
       inner.update(firstByte, firstByteNewValue)
       var i = firstByte + 1
@@ -205,12 +201,12 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
       val byte = inner(i)
       val init = 
         if (i == firstByte)
-          firstByte % 8
+          firstByte % 64
         else
-          0
+          64
       var k = init
       while (k < 8 && res == -1) {
-        if (f((byte & (1 << k)) > 0))
+        if (f((byte & (1L << k)) > 0))
           res = ((i*8)+k)
         k+=1
       }
@@ -235,12 +231,12 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
       val byte = inner(i)
       val end =
         if (i == firstByte)
-          8 - (fromIndex % 8)
+          64 - (fromIndex % 64)
         else
-          8
+          64
       var k = end - 1
       while (k >= 0 && res == -1) {
-        if (f((byte & (1 << k)) > 0))
+        if (f((byte & (1L << k)) > 0))
           res = ((i*8)+k)
         k-=1
       }
@@ -270,23 +266,23 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
   def size(): Int =
     _size
 
-  private val bitNumber: Map[Int, Int] = Map(
-      0x00 -> 0,
-      0x01 -> 1,
-      0x02 -> 1,
-      0x03 -> 2,
-      0x04 -> 1,
-      0x05 -> 2,
-      0x06 -> 2,
-      0x07 -> 3,
-      0x08 -> 1,
-      0x09 -> 2,
-      0x0A -> 2,
-      0x0B -> 3,
-      0x0C -> 2,
-      0x0D -> 3,
-      0x0E -> 3,
-      0x0F -> 4
+  private val bitNumber: Map[Long, Int] = Map(
+      0x00L -> 0,
+      0x01L -> 1,
+      0x02L -> 1,
+      0x03L -> 2,
+      0x04L -> 1,
+      0x05L -> 2,
+      0x06L -> 2,
+      0x07L -> 3,
+      0x08L -> 1,
+      0x09L -> 2,
+      0x0AL -> 2,
+      0x0BL -> 3,
+      0x0CL -> 2,
+      0x0DL -> 3,
+      0x0EL -> 3,
+      0x0FL -> 4
       )
   
   def length(): Int = {
@@ -306,14 +302,17 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
   }
   
   def cardinality(): Int = {
-    var res = 0
+    var res = 0L
     var i = 0
     while (i < byteSize) {
       val byte = inner(i)
-      res += bitNumber((byte >> 4) & 0x0F) + bitNumber(byte & 0x0F)
+      var k = 0
+      while (k < 16) {
+        res += bitNumber(byte >> 4*k) & 0x0000000FL
+      }
       i+=1
     }
-    res
+    res.toInt
   }
   
   override def clone(): BitSet = {
@@ -333,8 +332,8 @@ class BitSet(nbits: Int)(implicit a: Allocator) {
     var first = false
     for (i <- 0 until inner.size) {
       val byte = inner(i)
-      for (k <- 0 until 8) {
-        if ((byte & (1 << k)) > 0) {
+      for (k <- 0 until 64) {
+        if ((byte & (1L << k)) > 0L) {
           if (!first)
             first = true
           else
