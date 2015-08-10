@@ -201,13 +201,13 @@ class BitSet(nbits: Int)(implicit region: Region) {
       val byte = inner(i)
       val init = 
         if (i == firstByte)
-          firstByte % 64
+          fromIndex % 64
         else
           64
       var k = init
       while (k < 8 && res == -1) {
         if (f((byte & (1L << k)) > 0))
-          res = ((i*8)+k)
+          res = ((i*64)+k)
         k+=1
       }
       i+=1
@@ -226,18 +226,18 @@ class BitSet(nbits: Int)(implicit region: Region) {
   def _previousBit(fromIndex: Int, f: Boolean => Boolean): Int = {
     var res = -1
     val firstByte = byteOfBitN(fromIndex)
-    var i = byteOfBitN(fromIndex) - 1
+    var i = firstByte
     while (i >= 0 && res == -1) {
       val byte = inner(i)
       val end =
         if (i == firstByte)
-          64 - (fromIndex % 64)
+          /*64 - */(fromIndex % 64)
         else
           64
       var k = end - 1
       while (k >= 0 && res == -1) {
         if (f((byte & (1L << k)) > 0))
-          res = ((i*8)+k)
+          res = ((i*64)+(k))
         k-=1
       }
       i-=1
