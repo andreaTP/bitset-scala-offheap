@@ -72,7 +72,7 @@ object OffheapAlgo {
   def run(n: Int) = {
     var i = n
     while (i > 0) {
-      implicit val props = Region.Props()
+      implicit val props = Region.Props(Pool())
       implicit val r = Region.open
 
       algo.bitmapSearch(data.text, data.pattern, (m) => new eu.unicredit.offheap.BitSet(m+1))
