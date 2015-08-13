@@ -1,3 +1,5 @@
+import pl.project13.scala.sbt.JmhPlugin
+import pl.project13.scala.sbt.SbtJmh._
 
 val common: sbt.Project.SettingsDefinition = Seq(
 	organization := "eu.unicredit",
