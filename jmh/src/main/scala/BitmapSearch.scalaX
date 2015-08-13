@@ -1,41 +1,45 @@
 package jmh
 
-import org.openjdk.jmh.annotations._
+//import org.openjdk.jmh.annotations._
 import scala.offheap._
 
-@State(Scope.Thread)
+//@State(Scope.Thread)
 class GCBitmapSearch {
-  @Param(scala.Array("20"))
-  var n: Int = _
+  //@Param(scala.Array("20"))
+  //var n: Int = _
+  var n = 10
 
-  @Benchmark
+  //@Benchmark
   def run = GCAlgo.run(n)
 }
 
-@State(Scope.Thread)
+//@State(Scope.Thread)
 class OffheapBitmapSearch {
-  @Param(scala.Array("20"))
-  var n: Int = _
+  //@Param(scala.Array("20"))
+  //var n: Int = _
+  var n = 10
 
-  @Benchmark
+  //@Benchmark
   def run = OffheapAlgo.run(n)
 }
 
 object algo {
+  /*
   type BS = {
     def set(n: Int): Unit
     def set(n: Int, value: Boolean): Unit
     def get(n: Int): Boolean
   }
-  
-  def bitmapSearch(text: String, pattern: String, newBitSet: Int => BS): Int = {
+*/
+  def bitmapSearch(text: String, pattern: String, newBitSet: Int/* => BS*/): Int = {
+    /*
     val m = pattern.length
     var result = -1
     if (m == 0) return 0
     else {
       val R = newBitSet(m+1)
       R.set(0)
-      
+
       var i, k = 0
       val textLength = text.length()
       while(i < textLength && result == -1) {
@@ -46,11 +50,14 @@ object algo {
         }
         if (R.get(m))
           result = i-m+1
-        
+
         i += 1
       }
       return result
     }
+    * 
+    */
+    return 1
   }
 }
 
@@ -58,9 +65,9 @@ object GCAlgo {
   def run(n: Int) = {
     var i = n
     while (i > 0) {
-      
-      algo.bitmapSearch(data.text, data.pattern, (m) => new java.util.BitSet(m+1))
-      
+
+      //algo.bitmapSearch(data.text, data.pattern, (m) => new java.util.BitSet(m+1))
+
       i -= 1
     }
   }
@@ -70,12 +77,12 @@ object OffheapAlgo {
   def run(n: Int) = {
     var i = n
     while (i > 0) {
-      implicit val props = Region.Props()
-      implicit val r = Region.open
-      
-      algo.bitmapSearch(data.text, data.pattern, (m) => new eu.unicredit.offheap.BitSet(m+1))
-      
-      r.close
+      //implicit val props = Region.Props()
+      //implicit val r = Region.open
+
+      //algo.bitmapSearch(data.text, data.pattern, (m) => new eu.unicredit.offheap.BitSet(m+1))
+
+      //r.close
       i -= 1
     }
   }
@@ -83,7 +90,7 @@ object OffheapAlgo {
 
 object data {
   val pattern = "Duis euismod bibendum nisl."
-  val text = 
+  val text =
     """
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent neque mauris, consequat et mauris in, varius blandit leo. Aliquam non ornare libero. Sed dictum vel felis vitae pretium. Phasellus eget erat eu sem egestas pretium vel at augue. Sed blandit ex hendrerit congue fermentum. Duis eu leo sit amet lorem mattis sagittis. Nam euismod vitae enim a porttitor. Sed vestibulum massa id imperdiet convallis. Duis viverra fermentum bibendum. Morbi vulputate ipsum id urna luctus, ac pharetra lorem lacinia. Etiam blandit lacinia nisl sed ultrices. Sed condimentum urna eu enim hendrerit commodo. In ut fermentum tellus. Suspendisse pulvinar posuere leo.
 
@@ -383,6 +390,6 @@ Proin enim velit, molestie venenatis purus et, faucibus efficitur ipsum. Proin s
 
 Cras finibus mi non sapien pretium auctor. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Quisque aliquam, ipsum ac blandit vulputate, odio turpis auctor erat, in iaculis dolor leo euismod eros. Suspendisse consectetur suscipit sagittis. Duis a convallis tellus. Phasellus aliquet rhoncus volutpat. Nam ultrices nec massa at scelerisque.
 
-Donec aliquet ac lacus maximus gravida. Duis euismod bibendum nisl. Sed at cursus nulla, vitae sodales ex. Nulla nec elit ante. In quis pretium nunc. Sed auctor arcu dolor, pulvinar varius diam tristique at. Aliquam convallis diam et sapien suscipit placerat. Nullam tortor magna, gravida a neque ac, laoreet vehicula dui. Praesent id justo vestibulum, elementum nibh nec, faucibus tellus. Proin id finibus eros, vel dictum dui. Donec vitae neque ligula. Aliquam erat volutpat. Praesent sed orci convallis, gravida mauris vitae, fermentum felis. Fusce ut tempor lorem, non tristique ligula.      
+Donec aliquet ac lacus maximus gravida. Duis euismod bibendum nisl. Sed at cursus nulla, vitae sodales ex. Nulla nec elit ante. In quis pretium nunc. Sed auctor arcu dolor, pulvinar varius diam tristique at. Aliquam convallis diam et sapien suscipit placerat. Nullam tortor magna, gravida a neque ac, laoreet vehicula dui. Praesent id justo vestibulum, elementum nibh nec, faucibus tellus. Proin id finibus eros, vel dictum dui. Donec vitae neque ligula. Aliquam erat volutpat. Praesent sed orci convallis, gravida mauris vitae, fermentum felis. Fusce ut tempor lorem, non tristique ligula.
     """
 }
