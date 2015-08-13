@@ -1,4 +1,0 @@
-
-https://github.com/lemire/simplebitmapbenchmark
-https://github.com/lemire/javaewah#benchmark
-https://github.com/alexmasselot/benchmark-bitarray
